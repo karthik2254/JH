@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIOHOTSTAR iOS UI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: #f2f2f7;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffffcc;
+      padding: 10px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .menu-button { font-size: 22px; background: none; border: none; cursor: pointer; padding: 4px 8px; }
+    .menu-button img { width: 22px; height: 22px; vertical-align: middle; }
+    .brand { font-size: 17px; font-weight: 600; color: #000; }
+    .theme-toggle { background: #007aff; border: none; border-radius: 12px; color: #fff; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+
+    /* Menu */
+    .menu-section { display: none; flex-direction: column; padding: 10px 16px; background: #fff; border-bottom: 1px solid #ccc; }
+    .menu-item { padding: 12px 0; font-weight: 500; color: #007aff; border-bottom: 1px solid #eee; cursor: pointer; }
+
+    /* Search Bar */
+    .search-bar { padding: 10px 16px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 52px; z-index: 999; }
+    .search-bar input { width: 100%; padding: 8px 12px; border-radius: 12px; border: 1px solid #ccc; font-size: 14px; outline: none; }
+
+    /* Grid */
+    h2 { font-size: 18px; margin: 16px 16px 8px; color: #333; }
+    a { text-decoration: none; }
+    .channel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 15px; max-width: 1000px; margin: 0 auto; }
+    .channel-box { background: #fff; border-radius: 16px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); text-align: center; transition: transform 0.2s; position: relative; }
+    .channel-box:hover { transform: scale(1.05); }
+    .channel-box img { width: 100%; max-width: 70px; height: 70px; border-radius: 12px; object-fit: cover; }
+    .channel-box span { display: block; margin-top: 4px; font-size: 12px; color: #333; }
+
+    /* LIVE badge */
+    .live-badge { position: absolute; top: 8px; right: 8px; background: red; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 12px; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+
+    /* Bottom Time Bar */
+    .bottom-time-bar { position: fixed; bottom: 0; width: 100%; background-color: #ffffffcc; color: #000; text-align: center; padding: 10px 0; font-weight: 600; font-size: 14px; backdrop-filter: blur(6px); z-index: 999; }
+
+    /* Dark Mode */
+    body.dark { background-color: #111; color: #fff; }
+    body.dark .top-bar { background-color: #1c1c1eaa; color: #fff; }
+    body.dark .brand { color: #fff; }
+    body.dark .theme-toggle { background: #fff; color: #111; }
+    body.dark .channel-box { background: #1c1c1e; color: #fff; }
+    body.dark .channel-box span { color: #fff; }
+    body.dark .menu-section { background: #1c1c1e; }
+    body.dark .menu-item { color: #0a84ff; border-bottom: 1px solid #444; }
+    body.dark .bottom-time-bar { background-color: #1c1c1eaa; color: #fff; }
+    body.dark .search-bar { background-color: #1c1c1e; }
+    body.dark .search-bar input { background-color: #2c2c2e; color: #fff; border: 1px solid #444; }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .channel-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <button class="menu-button" onclick="toggleMenu()">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828859.png" alt="Menu">
+    </button>
+    <div class="brand">JIOTV + </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Dark</button>
+  </div>
+
+  <!-- Menu -->
+  <div id="menu-section" class="menu-section">
+    <a href="live.html" class="menu-item">📺 LIVE TV</a>
+    <a href="drm.html" class="menu-item">▶️ DRM PLAYER</a>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input type="text" id="channelSearch" placeholder="Search channels..." onkeyup="filterChannels()">
+  </div>
+
+  <!-- LIVE TV Grid -->
+  <div class="channel-grid">
+    <a href="https://tinyurl.com/sse-eng">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEjUyWv-k_TYwDR5xqwZxVcr23CtbOrNB1zsGElLg17jKJgndgMqHld9BB3y_MBdcWaRJSyrkx-zJSsX2UvL9JCeJB8QFuLwoi7388ml6OsHUWgCF2dhCXwZRrs7rYCcQ0TDN9OwM4T-NkuyKpQt5VVWla_QnKlwN8bE4Ja56xtahq7_UrG4F1wfp72XeUYL=s632" alt="Star Sports 1 HD Telugu">
+        <span>Star Sports 1 HD Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/ssh-hindi">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEg2V3dXgvI-4b1udK4WjjB3WLGX6G5CsY_EkZurHK_PS60JasGe4SLHeek4IcKBGmCFqyT3LoCwQ1zNCg4amhJ39rNjsjLXOPDRdzNN7UbF0ZbcIvCaGXB-P4gPH-IFAciJVfHETkdFybTBnDj-sOjEOqY4q2Fvjz_AXnmpdVH2D896yuhxwVDcSvWiknTT=s649" alt="Star Sports 2 HD Telugu">
+        <span>Star Sports 2 HD Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/ss2-eng">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEjqr7d7tdvTsK7yfgvyjvGu3eL1TfxjnWe7tflqBEVqmc-1sqLVpw_9328XjM4eN0tHS1nU6qlZWCD1R4vUFhJ5H0W6jbrFTCldHiqQNpwENbKiFxuT2R7C2Lodr_odY8UeteccHoF7vVmM7WhIr6Xi7wgW7bDVx6wgzFbzQtzb_LFXGoDRnWJDCi5Impdx=s1167" alt="Star Maa HD">
+        <span>Star Maa HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sst-telugu">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgULyKmd-h61nnW6OFsWp0ZUZLuE1_Jjn6ihXTHt2CAZNZBO9_C9jjHAHIBwmyoLQ3vaAum_UV0VWOz8RujCsCdaCBsqNI3ek0YDeTjQWaXl3Z_iPhp_r0XT_UplzkfkK50Hkg3MQ0Ytfm8gRAvgxAego6B_DMorZFievMhZv1iD3ne23tglH_kWb1J4aEM=s1190" alt="Star Maa Movies HD">
+        <span>Star Maa Movies HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss1-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEiufd1jJC9bYf4uFxupNjHJdeApqqvZq9KpNUqD7e-kmgNmZqoFB04uON5wsVez7nyR9Q31rU6J9WLwlkcuRgWM3CcEYU01omi44xVwKAeSZ5TIHlahPheQ_vweXNP55kLwfSPYH6mY6ah19E8q--Okhg6ZYBnL0940sBZmFHHCb8yVObWEocqPC7Nhsy1N=s585" alt="Star Maa Gold">
+        <span>Star Maa Gold</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Maa_Music.png" alt="Star Maa Music">
+        <span>Star Maa Music</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Star_Movies_HD.png" alt="Star Movies HD">
+        <span>Star Movies HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEishzMxNdiUj714j3-lQupjXndxDC44LlrXtokmbrIHaOpdyLETYNcWyfqk2tH3jn7pgq9dg0dNCNMG2Gtl3YKEqMyBtzzPtO_LA-HZmR4ca2mxdDj508AdlAudvWab1e4hJZYDFicDYiAbS605J1OKHORNqTihBxqBBAYmihaUf4Pwwdy5L1DyrOTkEToO=s720" alt="Star Movies Select HD">
+        <span>Star Movies Select HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEglV8ptrKCVh5QUIgg1ej3bsjWne5i23OGS6-lNDCKMMlHJ_FaHFjzTvlZ6mvtzqRKjXcxKfNqr8TOe64QxQYHeJRbU0akAupz8UEPt5F16-SI2b20XqFbkbsaZbvN9d8fjmIvYu8Wrwyi5wRjAgutSfrmJ1MSrNOqWKpUBWZe3Bhk713gEf66H1G86vw=s1600" alt="Star Sports Select 2 HD">
+        <span>Zee Telugu Hd</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEhBBoPRAbU3zDYaJgYK3xaUMXvabDJZteQshSImmYohAvg2KDhJdJ1kXz1Zv6N2cAKTXgC8g3tQ-znRM_9eMDQgJ36KdMah3mbLifhyaIHT0tCkfQQ1YBOO1LIb5sGXztLOtqS9AjyeGVbAOKCkG_M3_6AntrDUCducwma6GvstOY6ZuzdoT_iUTJ3NRA=s1600" alt="Star Sports Select 2 HD">
+        <span>Zee Cinemalu HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Gemini_TV_HD.png" alt="Gemini TV HD">
+        <span>Gemini TV HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Gemini_Movies_HD.png" alt="Gemini Movies HD">
+        <span>Gemini Movies HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Gemini_Comedy.png" alt="Gemini comedy">
+        <span>Gemini comedy</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Gemini_Life.png" alt="Gemini Life">
+        <span>Gemini Life</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Gemini_Music_HD.png" alt="Gemini Music HD">
+        <span>Gemini Music HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Kushi_TV.png" alt="Kushi TV">
+        <span>Kushi TV</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_HD.png" alt="ETV HD">
+        <span>ETV HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Plus_HD.png" alt="ETV Plus HD">
+        <span>ETV Plus HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/ETV_Cinema_HD.png" alt="ETV Cinema HD">
+        <span>ETV Cinema HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Disney_Channel.png" alt="Disney Channel">
+        <span>Disney Channel</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Super_Hungama.png" alt="Super Hungama">
+        <span>Super Hungama</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Cartoon_Network_Telugu.png" alt="Cartoon Network Telugu">
+        <span>Cartoon Network Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Nick_Telugu.png" alt="Nick Telugu">
+        <span>Nick Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/CN_HD_Telugu.png" alt="CN HD+ Telugu">
+        <span>CN HD+ Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Sonic_Telugu.png" alt="Sonic Telugu">
+        <span>Sonic Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Pogo_Telugu.png" alt="Pogo Telugu">
+        <span>Pogo Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Ten_HD.png" alt="Sony Ten 1 HD">
+        <span>Sony Ten 1 HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Ten2_HD.png" alt="Sony Ten 2 HD">
+        <span>Sony Ten 2 HD</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Ten3_HD.png" alt="Sony Ten 3 HD Hindi">
+        <span>Sony Ten 3 HD Hindi</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Ten_4_HD_Tamil.png" alt="Pogo Telugu">
+        <span>Sony Ten 4 HD Tamil</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Ten_4_HD_Telugu.png" alt="Sony Ten 4 HD Telugu">
+        <span>Sony Ten 4 HD Telugu</span>
+      </div>
+    </a>
+    <a href="https://tinyurl.com/sss2-english">
+      <div class="channel-box">
+        <div class="live-badge">LIVE</div>
+        <img src="https://jiotvimages.cdn.jio.com/dare_images/images/Six_HD.png" alt="Sony Ten 5 HD">
+        <span>Sony Ten 5 HD</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Bottom Time Bar -->
+  <div class="bottom-time-bar">
+    <span id="indiaTime">Loading time...</span>
+  </div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const body = document.body;
+      const toggle = document.querySelector(".theme-toggle");
+      body.classList.toggle("dark");
+      toggle.textContent = body.classList.contains("dark") ? "Light" : "Dark";
+    }
+
+    // Menu toggle
+    function toggleMenu() {
+      const menu = document.getElementById("menu-section");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    // Update Indian time
+    function updateIndianTime() {
+      const indiaTime = new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      });
+      document.getElementById("indiaTime").textContent = "🕒 " + indiaTime + " IST";
+    }
+    setInterval(updateIndianTime, 1000);
+    updateIndianTime();
+
+    // Channel search filter
+    function filterChannels() {
+      const input = document.getElementById("channelSearch").value.toLowerCase();
+      const channels = document.querySelectorAll(".channel-box");
+      channels.forEach(channel => {
+        const name = channel.querySelector("span").textContent.toLowerCase();
+        channel.parentElement.style.display = name.includes(input) ? "block" : "none";
+      });
+    }
+  </script>
+</body>
+
+</html>
