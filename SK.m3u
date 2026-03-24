@@ -44,7 +44,7 @@ https://delta12tatasky.akamaized.net/out/i/22.mpd
 #KODIPROP:inputstream.adaptive.license_key={"keys":[{"kty":"oct","k":"VZO0xNQW0MoYMF9Jgbc3mA","kid":"V4w2X/izSY2I4YVaj5KpwA"}]}
 https://delta12tatasky.akamaized.net/out/i/33.mpd
 
-#EXTINF:-1 tvg-id="956" tvg-name="STAR Gold HD" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Gold_HD.png" tvg-language="Telugu", STAR Maa HD
+#EXTINF:-1 tvg-id="956" tvg-name="STAR Gold HD" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Gold_HD.png" tvg-language="Telugu", STAR Gold HD
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=6f715e0e16cf4b20bc94f6f85023974b:516785ded0aee1dafae22e2874528b2a
 #EXTVLCOPT:http-user-agent=Mozilla/5.0
