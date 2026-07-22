@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>JioTv+</title>
+    
+    <!-- Pako Library for GZIP decompression -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(148, 163, 184, 0.1);
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --gradient-start: #1e293b;
+            --gradient-end: #0f172a;
+            --modal-bg: #1e293b;
+            --jio-blue: #0a3d91;
+            --progress-bg: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            min-height: 100vh;
+            padding: 1.5rem 1rem;
+            color: var(--text-main);
+        }
+
+        .app { max-width: 1400px; margin: 0 auto; }
+
+        /* --- Header & Layout --- */
+        .header {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            gap: 1rem; margin-bottom: 2rem; padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            background: linear-gradient(135deg, #38bdf8, #3b82f6); width: 45px; height: 45px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+        .logo-text h1 {
+            font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+        
+        .bookmark-header-btn {
+            background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted);
+            width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease; position: relative; backdrop-filter: blur(10px);
+        }
+        .bookmark-header-btn:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-2px); }
+        .bookmark-header-btn.active { background: var(--accent-color); color: #0f172a; border-color: var(--accent-color); }
+        .bookmark-count {
+            position: absolute; top: -4px; right: -4px; background: #ef4444; color: white;
+            font-size: 0.7rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--bg-color);
+        }
+
+        .search-wrapper {
+            display: flex; align-items: center; background: var(--card-bg); border-radius: 16px;
+            padding: 0.5rem 1rem; border: 1px solid var(--card-border); width: min(320px, 100%);
+            transition: all 0.3s ease; backdrop-filter: blur(10px);
+        }
+        .search-wrapper:focus-within { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); background: rgba(30, 41, 59, 0.9); }
+        .search-wrapper i { color: var(--text-muted); margin-right: 10px; }
+        .search-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: white; font-size: 0.95rem; }
+
+        /* --- Categories --- */
+        .category-shell { margin-bottom: 2rem; }
+        .cats-inner { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+        .cat-chip {
+            background: rgba(255,255,255,0.03); padding: 0.5rem 1.2rem; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 500; color: var(--text-muted); cursor: pointer;
+            border: 1px solid transparent; transition: all 0.2s;
+        }
+        .cat-chip:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .cat-chip.active {
+            background: var(--accent-color); color: #0f172a; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+        }
+        .toggle-cat-btn {
+            background: transparent; border: 1px solid var(--card-border); color: var(--text-muted);
+            padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+        }
+        .toggle-cat-btn:hover { border-color: var(--text-muted); color: #fff; }
+
+        /* --- Grid --- */
+        .channel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1.2rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .channel-card {
+            background: var(--card-bg); border-radius: 20px; padding: 1rem 0.5rem 1rem;
+            border: 1px solid var(--card-border); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; align-items: center; position: relative;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .channel-card:hover { transform: translateY(-5px); border-color: rgba(56, 189, 248, 0.4); background: rgba(30, 41, 59, 0.9); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+
+        .card-logo {
+            width: 80px; height: 80px; border-radius: 18px; background: rgba(15, 23, 42, 0.6);
+            display: flex; align-items: center; justify-content: center; padding: 8px; margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .card-logo img { max-width: 100%; max-height: 100%; border-radius: 12px; object-fit: contain; }
+
+        .card-name { font-weight: 600; font-size: 0.85rem; text-align: center; color: var(--text-main); padding: 0 4px; word-break: break-word; line-height: 1.3; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .card-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+        .hd-badge { background: linear-gradient(135deg, #ec4899, #8b5cf6); font-size: 0.6rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; color: white; text-transform: uppercase; }
+        .cat-tag { background: rgba(255,255,255,0.1); font-size: 0.65rem; padding: 2px 8px; border-radius: 6px; color: var(--text-muted); }
+
+        .bookmark-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.8);
+            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; z-index: 2;
+        }
+        .bookmark-btn:hover { background: #fff; color: #ef4444; transform: scale(1.1); }
+        .bookmark-btn.active { color: #ef4444; background: rgba(255,255,255,0.1); border-color: #ef4444; }
+
+        /* --- Modal & EPG Panel --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 1rem;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .modal-card {
+            background: var(--modal-bg); width: 100%; max-width: 900px; border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;
+        }
+        .modal-overlay.show .modal-card { transform: scale(1); }
+
+        .modal-body { display: grid; grid-template-columns: 1fr 1.8fr; gap: 0; overflow: hidden; }
+
+        /* Left Column (Channel Info) */
+        .modal-col-left {
+            background: rgba(0,0,0,0.2); padding: 2rem; display: flex; flex-direction: column; align-items: center;
+            text-align: center; border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .modal-channel-img { width: 100px; height: 100px; border-radius: 20px; object-fit: contain; margin-bottom: 1rem; background: rgba(0,0,0,0.2); padding: 10px; }
+        .modal-channel-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff; line-height: 1.2; }
+        .modal-channel-cat { background: rgba(255,255,255,0.1); color: var(--accent-color); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .play-btn {
+            display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem;
+            background: var(--accent-color); color: #0f172a; border: none; border-radius: 16px;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer; text-decoration: none; gap: 10px;
+            transition: all 0.2s; margin-bottom: 1rem;
+        }
+        .play-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3); background: #7dd3fc; }
+        .close-modal { margin-top: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; padding: 0.5rem; text-decoration: underline; }
+        .close-modal:hover { color: #fff; }
+
+        /* Right Column (Hero Image + EPG Panel) */
+        .modal-col-right { display: flex; flex-direction: column; background: rgba(15,23,42,0.3); overflow-y: auto; position: relative; }
+        
+        /* Hero Image Section */
+        .hero-image-section {
+            width: 100%; aspect-ratio: 16/9; position: relative; background: #000; flex-shrink: 0;
+        }
+        .hero-image-section img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s ease; }
+        .hero-image-section img.loaded { opacity: 1; }
+        
+        .img-source-tag {
+            position: absolute; top: 15px; right: 15px; padding: 4px 10px; border-radius: 8px;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            backdrop-filter: blur(6px); z-index: 5;
+        }
+        .img-source-tag.jio { background: linear-gradient(135deg, #0a3d91, #0288d1); color: #fff; box-shadow: 0 2px 8px rgba(10, 61, 145, 0.5); }
+        .img-source-tag.tmdb { background: linear-gradient(135deg, #01b4e4, #90cea1); color: #000; }
+        .img-source-tag.wiki { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+        .img-source-tag.epg { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+
+        /* EPG Panel Styling */
+        .epg-panel { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        .epg-header {
+            font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;
+        }
+        .epg-header i { color: var(--accent-color); }
+
+        /* Now Playing Card */
+        .now-playing-card { margin-bottom: 2rem; position: relative; }
+        .now-title {
+            font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.4;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .now-title i { color: #ef4444; font-size: 0.9em; animation: livePulse 2s infinite; }
+        @keyframes livePulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .now-time { font-size: 0.9rem; color: var(--accent-color); font-weight: 600; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+        
+        .progress-track {
+            width: 100%; height: 6px; background: var(--progress-bg); border-radius: 3px;
+            margin: 10px 0 15px 0; overflow: hidden; position: relative;
+        }
+        .progress-fill {
+            height: 100%; background: var(--accent-color); width: 0%; border-radius: 3px;
+            transition: width 1s linear; position: relative;
+        }
+        .progress-fill::after {
+            content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 2px;
+            background: #fff; box-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        .now-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Upcoming List */
+        .upcoming-title {
+            font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;
+            margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+        }
+        .upcoming-list { display: flex; flex-direction: column; gap: 4px; }
+        
+        .epg-item-modern {
+            display: grid; grid-template-columns: 110px 1fr; gap: 15px; padding: 12px;
+            border-radius: 12px; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .epg-item-modern:hover { background: rgba(255,255,255,0.03); }
+        
+        .epg-time-modern {
+            font-size: 0.85rem; color: var(--text-muted); font-weight: 600; display: flex;
+            flex-direction: column; justify-content: center; text-align: right; border-left: 2px solid rgba(255,255,255,0.05);
+            padding-left: 10px; line-height: 1.3;
+        }
+        .epg-info { display: flex; flex-direction: column; justify-content: center; }
+        .epg-title-modern { font-size: 1rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; line-height: 1.3; }
+        .epg-desc-modern { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Scrollbars */
+        .modal-col-right::-webkit-scrollbar { width: 6px; }
+        .modal-col-right::-webkit-scrollbar-track { background: transparent; }
+        .modal-col-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        /* Utilities */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .empty-box { grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+
+        @media (max-width: 768px) {
+            .modal-body { grid-template-columns: 1fr; overflow-y: auto; }
+            .modal-col-left { flex-direction: row; padding: 1.5rem; align-items: center; text-align: left; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+            .modal-channel-img { width: 60px; height: 60px; margin-bottom: 0; }
+            .modal-channel-name { font-size: 1.1rem; margin-bottom: 0.2rem; }
+            .modal-channel-cat { margin-bottom: 0; font-size: 0.7rem; margin-right: auto; }
+            .modal-actions-mobile { display: flex; gap: 8px; }
+            .play-btn { width: auto; padding: 0.5rem 1rem; font-size: 0.9rem; margin-bottom: 0; }
+            .close-modal { display: none; }
+            .hero-image-section { aspect-ratio: 21/9; }
+            .epg-item-modern { grid-template-columns: 1fr; gap: 5px; padding: 10px 0; }
+            .epg-time-modern { text-align: left; border-left: none; padding-left: 0; font-size: 0.8rem; color: var(--accent-color); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-tv"></i></div>
+            <div class="logo-text"><h1>JioTV+ </h1></div>
+        </div>
+        <div class="header-actions">
+            <div class="bookmark-header-btn" id="bookmarkHeaderBtn">
+                <i class="fas fa-bookmark"></i>
+                <span class="bookmark-count" id="bookmarkCount">0</span>
+            </div>
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search channels...">
+            </div>
+        </div>
+    </header>
+    <div class="category-shell">
+        <div class="cats-inner" id="catInner"></div>
+        <button class="toggle-cat-btn" id="toggleCatsBtn"><span id="toggleBtnText">Show More</span></button>
+    </div>
+    <div id="channelGrid" class="channel-grid"></div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <div class="modal-body">
+                <div class="modal-col-left">
+                    <img src="" alt="" class="modal-channel-img" id="modalLogo">
+                    <div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;margin-left: 1rem;">
+                        <h2 class="modal-channel-name" id="modalChannelName">Channel</h2>
+                        <div class="modal-channel-cat" id="modalGroupId">Category</div>
+                    </div>
+                    <div class="modal-actions-mobile">
+                        <a href="#" class="play-btn" id="playLink" ><i class="fas fa-play"></i> Watch</a>
+                        <button class="close-modal" id="closeModalBtn">Close</button>
+                    </div>
+                </div>
+                
+                <div class="modal-col-right" id="modalColRight">
+                    <!-- Content injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+
+    // --- CONFIGURATION ---
+    const CHANNELS_URL = 'https://raw.githubusercontent.com/ultron3000/ultron/refs/heads/main/channels1.json';
+    
+    // List of EPG Sources to fetch in parallel
+    const EPG_SOURCES = [
+        'https://whythishome.github.io/epg/guides/dishtv.in_en.xml.gz',
+        'https://mitthu786.github.io/tvepg/tataplay/epg.xml.gz'
+    ];
+    
+    const TMDB_API_KEY = '2dca580c2a14b55200e784d157207b4d';
+    const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/w780';
+    
+    const SEARX_INSTANCES = [
+        'https://searx.be',
+        'https://search.sapti.me',
+        'https://searx.tiekoetter.com',
+        'https://search.mdosch.de',
+        'https://searx.oxf.io',
+        'https://priv.au'
+    ];
+
+    // --- STATE ---
+    let allChannels = [], filtered = [];
+    let bookmarks = JSON.parse(localStorage.getItem('allinone_bookmarks_final_v2')) || [];
+    let categories = ['All'], activeCategory = 'All';
+    let categoriesExpanded = false, showingBookmarksOnly = false;
+    
+    let epgMap = new Map();
+    let epgLoaded = false;
+    
+    let tmdbCache = {}, tmdbDisabled = false;
+    let jiotvCache = {}, searxDisabled = false, workingSearxInstance = null;
+    let wikiCache = {};
+    let progressInterval = null;
+
+    // --- DOM ELEMENTS ---
+    const grid = document.getElementById('channelGrid');
+    const catInner = document.getElementById('catInner');
+    const searchInput = document.getElementById('searchInput');
+    const toggleBtn = document.getElementById('toggleCatsBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalLogo = document.getElementById('modalLogo');
+    const modalChannelName = document.getElementById('modalChannelName');
+    const modalGroupId = document.getElementById('modalGroupId');
+    const playLink = document.getElementById('playLink');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalColRight = document.getElementById('modalColRight');
+    const bookmarkHeaderBtn = document.getElementById('bookmarkHeaderBtn');
+    const bookmarkCount = document.getElementById('bookmarkCount');
+
+    // ==========================================
+    //  MULTI-SOURCE EPG LOGIC
+    // ==========================================
+
+    // Helper: Fetch and Parse a SINGLE XML source
+    async function fetchAndParseSingleEPG(url) {
+        if (typeof pako === 'undefined') return null;
+        try {
+            console.log('Fetching EPG source:', url);
+            const response = await fetch(url);
+            if(!response.ok) throw new Error(`Failed to fetch ${url}`);
+            const arrayBuffer = await response.arrayBuffer();
+            const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
+            const xmlDoc = new DOMParser().parseFromString(decompressed, 'text/xml');
+            
+            const programmes = xmlDoc.querySelectorAll('programme');
+            const channelsXml = xmlDoc.querySelectorAll('channel');
+            
+            // Map ID -> Name
+            const channelIdToName = new Map();
+            channelsXml.forEach(ch => {
+                const id = ch.getAttribute('id');
+                let displayName = ch.querySelector('display-name')?.textContent || '';
+                if(id && displayName) {
+                    displayName = displayName.replace(/\s*(HD|SD|FHD|4K|Plus|India|IN)\s*$/i, '').trim();
+                    channelIdToName.set(id, displayName);
+                }
+            });
+            
+            const tempMap = new Map();
+            programmes.forEach(prog => {
+                const chId = prog.getAttribute('channel');
+                let chName = channelIdToName.get(chId);
+                if(!chName) return;
+                
+                const startStr = prog.getAttribute('start');
+                const stopStr = prog.getAttribute('stop');
+                if(!startStr) return;
+                
+                const title = prog.querySelector('title')?.textContent || 'No title';
+                const desc = prog.querySelector('desc')?.textContent || '';
+                const icon = prog.querySelector('icon')?.getAttribute('src') || null;
+
+                let startDate = parseEPGDate(startStr);
+                let endDate = stopStr ? parseEPGDate(stopStr) : new Date(startDate.getTime() + 3600000);
+                if(!startDate) return;
+                
+                const key = normalizeChannelName(chName);
+                if(!tempMap.has(key)) tempMap.set(key, []);
+                
+                tempMap.get(key).push({ 
+                    title, 
+                    description: desc, 
+                    start: startDate, 
+                    end: endDate,
+                    icon: icon 
+                });
+            });
+
+            // Sort programs within this source
+            for(let [key, arr] of tempMap.entries()) {
+                arr.sort((a,b) => a.start - b.start);
+            }
+            
+            return tempMap;
+        } catch(err) {
+            console.warn(`Failed to load EPG from ${url}:`, err);
+            return null; // Return null so Promise.allSettled can handle it gracefully
+        }
+    }
+    
+    // Master Loader: Runs all fetches and merges results
+    async function loadAllEPG() {
+        const fetchPromises = EPG_SOURCES.map(url => fetchAndParseSingleEPG(url));
+        const results = await Promise.allSettled(fetchPromises);
+        
+        const mergedMap = new Map();
+        
+        results.forEach(res => {
+            if (res.status === 'fulfilled' && res.value) {
+                const sourceMap = res.value;
+                // Merge this source into the master map
+                for (let [channelName, programs] of sourceMap) {
+                    if (!mergedMap.has(channelName)) {
+                        mergedMap.set(channelName, []);
+                    }
+                    mergedMap.get(channelName).push(...programs);
+                }
+            }
+        });
+
+        // Deduplicate and Sort merged programs
+        for (let [channelName, programs] of mergedMap) {
+            // Remove duplicates based on title + start time
+            const uniqueProgs = [];
+            const seen = new Set();
+            
+            for (const p of programs) {
+                const key = p.title + p.start.getTime();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueProgs.push(p);
+                }
+            }
+            
+            // Final sort
+            uniqueProgs.sort((a, b) => a.start - b.start);
+            mergedMap.set(channelName, uniqueProgs);
+        }
+
+        epgMap = mergedMap;
+        epgLoaded = true;
+        console.log(`EPG Loaded: Merged ${EPG_SOURCES.length} sources. Total channels: ${epgMap.size}`);
+    }
+    
+    function parseEPGDate(dateStr) {
+        if(!dateStr) return null;
+        let [datetime, tz] = dateStr.split(' ');
+        tz = tz || '+0000';
+        let year = parseInt(datetime.slice(0,4));
+        let month = parseInt(datetime.slice(4,6))-1;
+        let day = parseInt(datetime.slice(6,8));
+        let hour = parseInt(datetime.slice(8,10));
+        let minute = parseInt(datetime.slice(10,12));
+        let second = parseInt(datetime.slice(12,14));
+        let date = new Date(Date.UTC(year, month, day, hour, minute, second));
+        let tzSign = tz[0];
+        let tzHours = parseInt(tz.slice(1,3));
+        let tzMins = parseInt(tz.slice(3,5));
+        let offset = (tzHours*3600 + tzMins*60)*1000;
+        if(tzSign === '-') offset = -offset;
+        date.setTime(date.getTime() - offset);
+        return date;
+    }
+    
+    function normalizeChannelName(name) {
+        let cleaned = name.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        cleaned = cleaned.replace(/\b(hd|sd|fhd|4k|plus|movies|music|news|tv|channel)\b/g, '').trim();
+        return cleaned;
+    }
+    
+    function findEPGForChannel(channelName) {
+        if(!epgLoaded) return null;
+        const normChannel = normalizeChannelName(channelName);
+        if(epgMap.has(normChannel)) return epgMap.get(normChannel);
+        // Partial matching
+        for(let [key, progs] of epgMap.entries()) {
+            if(key.includes(normChannel) || normChannel.includes(key)) return progs;
+        }
+        return null;
+    }
+    
+    function getCurrentAndNext(programmes, now = new Date()) {
+        if(!programmes?.length) return { current: null, next: [] };
+        let current = null, upcoming = [];
+        for(let i=0; i<programmes.length; i++) {
+            const p = programmes[i];
+            if(p.start <= now && p.end > now) {
+                current = p;
+                for(let j=i+1; j<Math.min(i+5, programmes.length); j++) upcoming.push(programmes[j]);
+                break;
+            } else if(p.start > now && upcoming.length < 4 && !current) {
+                upcoming.push(p);
+            }
+        }
+        if(!current && programmes.length && now < programmes[0].start) {
+            upcoming = programmes.slice(0,4);
+        }
+        if(!current && programmes.length && now > programmes[programmes.length-1].end) {
+            current = programmes[programmes.length-1];
+            upcoming = [];
+        }
+        return { current, next: upcoming };
+    }
+
+    // ==========================================
+    //  IMAGE FETCHING LOGIC (Unchanged)
+    // ==========================================
+
+    function cleanTitleForSearch(raw) {
+        let t = raw.trim();
+        t = t.replace(/\s*[\(\[].*?[\)\]]\s*$/gi, '').trim();
+        t = t.replace(/\b(?:episode|ep\.?)\s*\d+/gi, '').trim();
+        t = t.replace(/\bS\d+\s*E\d+\b/gi, '').trim();
+        t = t.replace(/\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g, '').trim();
+        t = t.replace(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\b/gi, '').trim();
+        t = t.replace(/\bSeason\s*\d+\b/gi, '').trim();
+        t = t.replace(/\s*[-–—]\s*$/g, '').trim();
+        t = t.replace(/\s{2,}/g, ' ').trim();
+        return t;
+    }
+
+    function getImageSeed(title) {
+        return title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20);
+    }
+
+    async function fetchSearxInstance(instance, query) {
+        try {
+            const url = `${instance}/search?q=${encodeURIComponent(query)}&format=json&categories=images&image_proxy=0&safesearch=0`;
+            const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (!data.results || !data.results.length) return null;
+            const jioResult = data.results.find(r => (r.url || r.img_src || '').includes('jiotvimages.cdn.jio.com'));
+            if (!jioResult) return null;
+            let imgUrl = jioResult.url || jioResult.img_src;
+            if (!imgUrl.includes('?')) imgUrl += '?width=700';
+            return imgUrl;
+        } catch (e) { return null; }
+    }
+
+    async function getJioTVImage(title) {
+        const clean = cleanTitleForSearch(title);
+        if (!clean || clean.length < 2 || searxDisabled) return null;
+        if (jiotvCache[clean] !== undefined) return jiotvCache[clean];
+
+        const queryStrategies = [`${clean} site:jiotvimages.cdn.jio.com`, `${clean} jiotv show image`];
+        const pool = workingSearxInstance ? [workingSearxInstance, ...SEARX_INSTANCES.slice(0, 4)] : SEARX_INSTANCES.slice(0, 5);
+
+        for (const query of queryStrategies) {
+            const promises = pool.map(inst => fetchSearxInstance(inst, query).then(url => { if(url) workingSearxInstance = inst; return url; }));
+            promises.push(new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)));
+            try {
+                const url = await Promise.any(promises);
+                if (url) { jiotvCache[clean] = url; return url; }
+            } catch (e) {}
+        }
+        if (!workingSearxInstance) searxDisabled = true;
+        jiotvCache[clean] = null;
+        return null;
+    }
+
+    async function getTMDBImage(title) {
+        if (tmdbDisabled) return null;
+        const clean = cleanTitleForSearch(title);
+        if (!clean || clean.length < 2) return null;
+        if (tmdbCache[clean] !== undefined) return tmdbCache[clean];
+
+        try {
+            const url = `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(clean)}&api_key=${TMDB_API_KEY}&language=en-US&include_adult=false`;
+            const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            if (res.status === 401 || res.status === 403) { tmdbDisabled = true; tmdbCache[clean] = null; return null; }
+            if (!res.ok) { tmdbCache[clean] = null; return null; }
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+                for (const show of data.results) {
+                    if (show.backdrop_path) { tmdbCache[clean] = TMDB_IMG_BASE + show.backdrop_path; return tmdbCache[clean]; }
+                }
+                if (data.results[0].poster_path) { tmdbCache[clean] = TMDB_IMG_BASE + data.results[0].poster_path; return tmdbCache[clean]; }
+            }
+            tmdbCache[clean] = null;
+            return null;
+        } catch (e) { tmdbCache[clean] = null; return null; }
+    }
+
+    async function getWikiImage(title) {
+        const clean = cleanTitleForSearch(title);
+        if (!clean || clean.length < 2) return null;
+        if (wikiCache[clean] !== undefined) return wikiCache[clean];
+        try {
+            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`;
+            const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) { wikiCache[clean] = null; return null; }
+            const data = await res.json();
+            if (data.thumbnail && data.thumbnail.source) {
+                let src = data.thumbnail.source.replace(/\/\d+px-/, '/800px-');
+                wikiCache[clean] = src; return src;
+            }
+            wikiCache[clean] = null; return null;
+        } catch (e) { wikiCache[clean] = null; return null; }
+    }
+
+    async function resolveProgramImage(programTitle, epgIconUrl) {
+        if (epgIconUrl && epgIconUrl.startsWith('http')) {
+            return { url: epgIconUrl, source: 'epg' };
+        }
+        const [jiotvRes, tmdbRes, wikiRes] = await Promise.allSettled([getJioTVImage(programTitle), getTMDBImage(programTitle), getWikiImage(programTitle)]);
+        if (jiotvRes.status === 'fulfilled' && jiotvRes.value) return { url: jiotvRes.value, source: 'jio' };
+        if (tmdbRes.status === 'fulfilled' && tmdbRes.value) return { url: tmdbRes.value, source: 'tmdb' };
+        if (wikiRes.status === 'fulfilled' && wikiRes.value) return { url: wikiRes.value, source: 'wiki' };
+        return { url: `https://picsum.photos/seed/${getImageSeed(programTitle)}/640/360`, source: null };
+    }
+
+    // ==========================================
+    //  APP LOGIC (Grid & Rendering)
+    // ==========================================
+
+    async function loadJSON() {
+        try {
+            const res = await fetch(CHANNELS_URL);
+            allChannels = await res.json();
+            extractCategories();
+            updateBookmarkCount();
+            filterAndRender();
+        } catch (e) {
+            grid.innerHTML = `<div class="empty-box"><i class="fas fa-exclamation-circle" style="font-size:2rem;margin-bottom:10px;"></i><br>Could not load channels.</div>`;
+        }
+    }
+
+    function extractCategories() {
+        const s = new Set();
+        allChannels.forEach(ch => { if (ch.group?.trim()) s.add(ch.group.trim()); });
+        categories = ['All', ...Array.from(s).sort()];
+        renderCategories();
+    }
+
+    function renderCategories() {
+        const limit = categoriesExpanded ? categories.length : 6;
+        const vis = categories.slice(0, limit);
+        let h = vis.map(c => `<span class="cat-chip ${activeCategory===c?'active':''}" data-cat="${c}">${c}</span>`).join('');
+        if (categories.length > 6 && !categoriesExpanded) h += `<span class="cat-chip">+${categories.length-6} more</span>`;
+        catInner.innerHTML = h;
+
+        catInner.querySelectorAll('.cat-chip[data-cat]').forEach(chip => {
+            chip.addEventListener('click', e => {
+                activeCategory = e.target.dataset.cat;
+                showingBookmarksOnly = false;
+                bookmarkHeaderBtn.classList.remove('active');
+                renderCategories(); filterAndRender();
+            });
+        });
+        toggleBtn.style.display = categories.length > 6 ? 'inline-block' : 'none';
+        document.getElementById('toggleBtnText').innerText = categoriesExpanded ? 'Show Less' : 'Show More';
+    }
+
+    toggleBtn.addEventListener('click', () => { categoriesExpanded = !categoriesExpanded; renderCategories(); });
+
+    function filterAndRender() {
+        const q = searchInput.value.trim().toLowerCase();
+        let t = [...allChannels];
+        if (showingBookmarksOnly) t = t.filter(ch => bookmarks.includes(String(ch.id)));
+        else if (activeCategory !== 'All') t = t.filter(ch => ch.group === activeCategory);
+        if (q) t = t.filter(ch => ch.name?.toLowerCase().includes(q));
+        filtered = t;
+        renderGrid(filtered);
+    }
+
+    function renderGrid(channels) {
+        if (!channels.length) { grid.innerHTML = `<div class="empty-box">No channels found.</div>`; return; }
+        grid.innerHTML = channels.map(ch => {
+            const bm = bookmarks.includes(String(ch.id));
+            const hd = ch.name && (ch.name.includes('HD') || ch.name.includes('FHD'));
+            return `<div class="channel-card" data-id="${ch.id}" data-name="${ch.name}" data-link="${ch.link}" data-group="${ch.group||''}" data-logo="${ch.logo}">
+                <div class="bookmark-btn ${bm?'active':''}" onclick="event.stopPropagation();toggleBookmark('${ch.id}',this)"><i class="fas fa-bookmark"></i></div>
+                <div class="card-logo"><img src="${ch.logo||'https://via.placeholder.com/150'}" alt="${ch.name}" loading="lazy"></div>
+                <div class="card-name">${ch.name}</div>
+                <div class="card-badges">${hd?'<span class="hd-badge">HD</span>':''}<span class="cat-tag">${(ch.group||'').slice(0,8)}</span></div>
+            </div>`;
+        }).join('');
+
+        grid.querySelectorAll('.channel-card').forEach(card => {
+            card.addEventListener('click', () => openModal({
+                id: card.dataset.id, name: card.dataset.name, link: card.dataset.link,
+                group: card.dataset.group, logo: card.dataset.logo
+            }));
+        });
+    }
+
+    window.toggleBookmark = function(id, btn) {
+        const i = bookmarks.indexOf(String(id));
+        if (i === -1) { bookmarks.push(String(id)); btn.classList.add('active'); }
+        else { bookmarks.splice(i, 1); btn.classList.remove('active'); }
+        localStorage.setItem('allinone_bookmarks_final_v2', JSON.stringify(bookmarks));
+        updateBookmarkCount();
+        if (showingBookmarksOnly) filterAndRender();
+    };
+
+    function updateBookmarkCount() {
+        bookmarkCount.textContent = bookmarks.length;
+        bookmarkCount.style.display = bookmarks.length > 0 ? 'flex' : 'none';
+    }
+
+    bookmarkHeaderBtn.addEventListener('click', () => {
+        if (!bookmarks.length) return;
+        showingBookmarksOnly = !showingBookmarksOnly;
+        bookmarkHeaderBtn.classList.toggle('active', showingBookmarksOnly);
+        if (showingBookmarksOnly) { activeCategory = 'All'; renderCategories(); }
+        filterAndRender();
+    });
+
+    // ==========================================
+    //  MODAL LOGIC
+    // ==========================================
+
+    function formatTime(date) {
+        if(!date) return '';
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function updateProgressBar(startTime, endTime) {
+        if(!startTime || !endTime) return;
+        const now = new Date();
+        const total = endTime - startTime;
+        const elapsed = now - startTime;
+        let pct = (elapsed / total) * 100;
+        if (pct < 0) pct = 0;
+        if (pct > 100) pct = 100;
+        
+        const fill = document.querySelector('.progress-fill');
+        if(fill) fill.style.width = `${pct}%`;
+    }
+
+    async function openModal(channel) {
+        modalChannelName.textContent = channel.name;
+        modalGroupId.textContent = channel.group || 'General';
+        modalLogo.src = channel.logo || 'https://via.placeholder.com/100';
+        playLink.href = channel.link;
+
+        // Show loading state
+        modalColRight.innerHTML = `
+            <div class="hero-image-section loading-skeleton"></div>
+            <div class="epg-panel">
+                <div class="epg-header loading-skeleton" style="width:150px;height:20px;"></div>
+                <div class="now-playing-card">
+                    <div class="now-title loading-skeleton" style="height:30px;width:80%;"></div>
+                    <div class="now-time loading-skeleton" style="height:20px;width:120px;"></div>
+                    <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+                    <div class="now-desc loading-skeleton" style="height:60px;"></div>
+                </div>
+            </div>
+        `;
+
+        modalOverlay.classList.add('show');
+
+        // 1. Get Schedule (Now checks merged map)
+        const allPrograms = findEPGForChannel(channel.name);
+        const { current, next } = getCurrentAndNext(allPrograms);
+        
+        if (!current) {
+            renderPlaceholder(channel);
+            return;
+        }
+
+        // 2. Resolve Image
+        const imgData = await resolveProgramImage(current.title, current.icon);
+        const fallbackSeed = getImageSeed(current.title);
+        const fallback = `https://picsum.photos/seed/${fallbackSeed}/640/360`;
+
+        // 3. Build HTML
+        const sourceTagHTML = imgData.source
+            ? `<span class="img-source-tag ${imgData.source}">${
+                imgData.source === 'jio' ? 'JioTV' : imgData.source === 'tmdb' ? 'TMDB' : imgData.source === 'wiki' ? 'Wikipedia' : 'EPG'
+              }</span>` : '';
+
+        const upcomingHTML = next.map(prog => `
+            <div class="epg-item-modern">
+                <div class="epg-time-modern">
+                    <span>${formatTime(prog.start)}</span>
+                    <span>${formatTime(prog.end)}</span>
+                </div>
+                <div class="epg-info">
+                    <div class="epg-title-modern">${prog.title}</div>
+                    <div class="epg-desc-modern">${prog.description ? prog.description.substring(0, 90) : ''}</div>
+                </div>
+            </div>
+        `).join('');
+
+        modalColRight.innerHTML = `
+            <div class="hero-image-section">
+                ${sourceTagHTML}
+                <img src="${imgData.url}" 
+                     referrerpolicy="no-referrer" crossorigin="anonymous"
+                     onerror="this.onerror=null;this.src='${fallback}';this.classList.add('loaded');"
+                     onload="this.classList.add('loaded')" alt="${current.title}">
+            </div>
+            
+            <div class="epg-panel" id="epgPanel">
+                <div class="epg-header"><i class="fas fa-calendar-alt"></i> TV GUIDE · NOW &amp; NEXT</div>
+                <div id="epgContent">
+                    <div class="now-playing-card">
+                        <div class="now-title"><i class="fas fa-play-circle"></i> ${current.title}</div>
+                        <div class="now-time">${formatTime(current.start)} – ${formatTime(current.end)}</div>
+                        <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+                        <div class="now-desc">${current.description || 'No description available.'}</div>
+                    </div>
+                    
+                    ${next.length ? `
+                    <div class="upcoming-title"><i class="fas fa-forward-step"></i> Next Shows</div>
+                    <div class="upcoming-list">
+                        ${upcomingHTML}
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        // Start Progress Timer
+        if(progressInterval) clearInterval(progressInterval);
+        updateProgressBar(current.start, current.end);
+        progressInterval = setInterval(() => {
+            updateProgressBar(current.start, current.end);
+        }, 1000);
+    }
+
+    function renderPlaceholder(channel) {
+        modalColRight.innerHTML = `
+             <div class="hero-image-section">
+                <img src="${channel.logo}" onerror="this.src='https://picsum.photos/seed/noepg/640/360';this.classList.add('loaded')" onload="this.classList.add('loaded')" alt="No Data">
+            </div>
+            <div class="epg-panel">
+                <div class="epg-header"><i class="fas fa-calendar-times"></i> TV GUIDE OFFLINE</div>
+                <div class="now-playing-card">
+                    <div class="now-title">Program Info Unavailable</div>
+                    <div class="now-desc">Couldn't find EPG schedule for <strong>${channel.name}</strong>.</div>
+                </div>
+            </div>
+        `;
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+        modalOverlay.classList.remove('show');
+        if(progressInterval) clearInterval(progressInterval);
+    });
+    
+    modalOverlay.addEventListener('click', e => { 
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove('show');
+            if(progressInterval) clearInterval(progressInterval);
+        }
+    });
+    
+    document.addEventListener('keydown', e => { 
+        if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+            modalOverlay.classList.remove('show');
+            if(progressInterval) clearInterval(progressInterval);
+        }
+    });
+
+    let searchTimer;
+    searchInput.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(filterAndRender, 300); });
+
+    init();
+    async function init() { 
+        loadJSON(); 
+        loadAllEPG(); // Updated to load multiple sources
+    }
+
+})();
+</script>
+
+</body>
+</html>
