@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JIOHOTSTAR Premium</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#f5f5f5;
+  color:#111;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* =========================
+   iOS Premium Floating Topbar
+========================= */
+
+.topbar{
+    position:fixed;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    width:94%;
+    max-width:950px;
+    height:60px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(28px) saturate(180%);
+    -webkit-backdrop-filter:blur(28px) saturate(180%);
+
+    border:1px solid rgba(255,255,255,.45);
+    border-radius:22px;
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.12),
+        inset 0 1px 1px rgba(255,255,255,.8),
+        inset 0 -1px 1px rgba(0,0,0,.08);
+
+    overflow:hidden;
+    z-index:1000;
+}
+
+/* Glass Reflection */
+
+.topbar::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-180%;
+    width:70%;
+    height:100%;
+
+    background:linear-gradient(
+        110deg,
+        transparent,
+        rgba(255,255,255,.75),
+        transparent
+    );
+
+    animation:glassMove 4s linear infinite;
+}
+
+/* Premium Logo */
+
+.logo{
+    position:relative;
+    z-index:2;
+
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+
+    background:linear-gradient(
+        90deg,
+        #000,
+        #444,
+        #fff,
+        #555,
+        #000
+    );
+
+    background-size:300% auto;
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    animation:
+        shine 5s linear infinite,
+        logoFloat 4s ease-in-out infinite;
+
+    text-shadow:
+        0 1px 0 rgba(255,255,255,.4),
+        0 4px 12px rgba(0,0,0,.25);
+
+    transform-style:preserve-3d;
+}
+
+
+
+/* Theme Button */
+
+.theme-toggle{
+    position:absolute;
+    right:10px;
+
+    width:42px;
+    height:42px;
+
+    border:none;
+    border-radius:14px;
+
+    background:rgba(255,255,255,.35);
+    backdrop-filter:blur(20px);
+
+    color:#111;
+    font-size:18px;
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    transition:.35s;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.8),
+        0 6px 16px rgba(0,0,0,.15);
+}
+
+.theme-toggle:hover{
+    transform:scale(1.08);
+    background:rgba(255,255,255,.6);
+}
+
+.theme-toggle:active{
+    transform:scale(.92);
+}
+
+/* Menu Button */
+
+.menu-btn{
+    position:fixed;
+    top:20px;
+    left:18px;
+
+    width:42px;
+    height:42px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:15px;
+
+    background:rgba(255,255,255,.55);
+    backdrop-filter:blur(25px);
+
+    border:1px solid rgba(255,255,255,.45);
+
+    color:#111;
+    font-size:21px;
+    cursor:pointer;
+
+    box-shadow:
+        0 8px 22px rgba(0,0,0,.15),
+        inset 0 1px 1px rgba(255,255,255,.8);
+
+    transition:.35s;
+
+    z-index:1100;
+}
+
+.menu-btn:hover{
+    transform:scale(1.08);
+}
+
+.menu-btn:active{
+    transform:scale(.92);
+}
+
+/* Logo Floating */
+
+@keyframes logoFloat{
+
+    0%{
+        transform:translateY(0) rotateX(8deg);
+    }
+
+    50%{
+        transform:translateY(-2px) rotateX(12deg);
+    }
+
+    100%{
+        transform:translateY(0) rotateX(8deg);
+    }
+
+}
+
+.logo{
+    position:relative;
+    z-index:2;
+
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+    font-size:26px;
+    font-weight:900;
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    background:linear-gradient(
+        90deg,
+        #00A8FF 0%,
+        #0072FF 25%,
+        #3F5EFB 45%,
+        #7B2FF7 65%,
+        #C33764 82%,
+        #FF2D55 100%
+    );
+
+    background-size:250% auto;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+
+    animation:
+        shine 5s linear infinite,
+        logoFloat 4s ease-in-out infinite;
+
+    text-shadow:
+        0 2px 6px rgba(0,0,0,.18),
+        0 6px 16px rgba(0,0,0,.12);
+}
+
+.live-text{
+    color:#FF2D55;
+    font-weight:900;
+    font-size:24px;
+    letter-spacing:1px;
+}
+
+.live-dot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#FF2D55;
+    display:inline-block;
+    margin-right:8px;
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    0%,100%{
+        opacity:1;
+        transform:scale(1);
+    }
+    50%{
+        opacity:.5;
+        transform:scale(.85);
+    }
+}
+
+/* Reflection */
+
+@keyframes glassMove{
+
+    from{
+        left:-180%;
+    }
+
+    to{
+        left:180%;
+    }
+
+}
+
+/* Metallic Shine */
+
+@keyframes shine{
+
+    from{
+        background-position:0%;
+    }
+
+    to{
+        background-position:300%;
+    }
+
+}
+
+.live-badge{
+    position:absolute;
+    right:10px;
+    top:10px;
+
+    display:flex;
+    align-items:center;
+    gap:5px;
+
+    height:32px;
+    padding:0 10px;
+
+    border:none;
+    border-radius:999px;
+
+    background:rgba(255,255,255,.28);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    color:#ff2d55;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.8px;
+
+    box-shadow:
+        0 6px 14px rgba(0,0,0,.12),
+        inset 0 1px 1px rgba(255,255,255,.8);
+
+    cursor:pointer;
+}
+
+/* Smaller Signal Bars */
+/* Signal */
+.signal{
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    width:10px;
+    height:12px;
+}
+
+.signal span{
+    display:block;
+    width:2px;
+    background:#ff2d55;
+    border-radius:2px;
+    animation:signalMove .9s infinite ease-in-out;
+}
+
+.signal span:nth-child(1){
+    animation-delay:0s;
+}
+
+.signal span:nth-child(2){
+    animation-delay:.2s;
+}
+
+.signal span:nth-child(3){
+    animation-delay:.4s;
+}
+
+@keyframes signalMove{
+    0%{
+        height:3px;
+        opacity:.5;
+    }
+    50%{
+        height:11px;
+        opacity:1;
+    }
+    100%{
+        height:3px;
+        opacity:.5;
+    }
+}
+
+.live-badge{
+    position:absolute;
+    right:10px;
+    top:10px;
+
+    display:flex;
+    align-items:center;
+    gap:6px;
+
+    height:32px;
+    padding:0 12px;
+
+    border:none;
+    border-radius:999px;
+
+    background:rgba(255,255,255,.28);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    color:#ff2d55;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.8px;
+
+    box-shadow:
+        0 6px 14px rgba(0,0,0,.12),
+        inset 0 1px 1px rgba(255,255,255,.8);
+
+    cursor:pointer;
+}
+
+/* Animated LIVE Dot */
+.live-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#ff2d55;
+    position:relative;
+}
+
+.live-dot::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#ff2d55;
+    transform:translate(-50%,-50%);
+    animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{
+    0%{
+        transform:translate(-50%,-50%) scale(1);
+        opacity:.8;
+    }
+    100%{
+        transform:translate(-50%,-50%) scale(2.8);
+        opacity:0;
+    }
+}
+
+/* MENU BUTTON */
+.menu-btn{
+  position:fixed;
+  top:18px;
+  left:18px;
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  background:rgba(0,0,0,.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  cursor:pointer;
+  z-index:1100;
+}
+
+/* SIDE MENU */
+.side-menu{
+  position:fixed;
+  left:-110px;
+  top:0;
+  width:90px;
+  height:100%;
+  background:rgba(255,255,255,.8);
+  backdrop-filter:blur(20px);
+  padding-top:90px;
+  transition:.35s cubic-bezier(.22,.61,.36,1);
+  z-index:999;
+}
+
+.side-menu.open{
+  left:0;
+}
+
+/* ============================
+   ULTRA PREMIUM 3D OTT BUTTON
+============================ */
+
+.ott-icon{
+    position:relative;
+    width:68px;
+    height:68px;
+    margin:14px auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:22px;
+
+    background:
+        linear-gradient(160deg,
+            rgba(255,255,255,.70),
+            rgba(255,255,255,.18) 45%,
+            rgba(255,255,255,.08) 100%);
+
+    backdrop-filter:blur(30px) saturate(180%);
+    -webkit-backdrop-filter:blur(30px) saturate(180%);
+
+    border:1px solid rgba(255,255,255,.35);
+
+    transform-style:preserve-3d;
+    perspective:1200px;
+
+    overflow:hidden;
+
+    transition:
+        transform .45s cubic-bezier(.2,.8,.2,1),
+        box-shadow .45s ease,
+        background .45s ease;
+
+    box-shadow:
+        0 2px 1px rgba(255,255,255,.9) inset,
+        0 -2px 3px rgba(0,0,0,.08) inset,
+        0 12px 30px rgba(0,0,0,.15),
+        0 25px 45px rgba(0,0,0,.12),
+        0 0 0 1px rgba(255,255,255,.15);
+}
+
+
+/* Top glossy reflection */
+
+.ott-icon::before{
+    content:"";
+    position:absolute;
+    top:-55%;
+    left:-20%;
+    width:140%;
+    height:90%;
+
+    background:
+        radial-gradient(circle,
+            rgba(255,255,255,.85),
+            rgba(255,255,255,.08) 70%,
+            transparent 100%);
+
+    transform:rotate(-12deg);
+    pointer-events:none;
+}
+
+
+/* Moving light */
+
+.ott-icon::after{
+    content:"";
+    position:absolute;
+    top:-30%;
+    left:-160%;
+    width:65%;
+    height:170%;
+
+    background:
+        linear-gradient(
+            115deg,
+            transparent,
+            rgba(255,255,255,.65),
+            transparent
+        );
+
+    transform:rotate(20deg);
+    transition:left .9s ease;
+    pointer-events:none;
+}
+
+
+/* Logo */
+
+.ott-icon img{
+    width:76%;
+    height:76%;
+    object-fit:contain;
+
+    position:relative;
+    z-index:5;
+
+    transform:translateZ(30px);
+
+    transition:
+        transform .45s ease,
+        filter .45s ease;
+
+    filter:
+        drop-shadow(0 6px 10px rgba(0,0,0,.25));
+}
+
+
+/* Hover */
+
+.ott-icon:hover{
+
+    transform:
+        perspective(1200px)
+        rotateX(12deg)
+        rotateY(-12deg)
+        translateY(-6px)
+        scale(1.10);
+
+    box-shadow:
+        0 3px 2px rgba(255,255,255,.9) inset,
+        0 -2px 5px rgba(0,0,0,.10) inset,
+        0 20px 45px rgba(0,0,0,.22),
+        0 35px 60px rgba(0,0,0,.18),
+        0 0 25px rgba(255,255,255,.20);
+
+}
+
+
+.ott-icon:hover::after{
+    left:180%;
+}
+
+
+.ott-icon:hover img{
+    transform:
+        translateZ(50px)
+        scale(1.10);
+
+    filter:
+        drop-shadow(0 12px 18px rgba(0,0,0,.30));
+}
+
+
+/* Click */
+
+.ott-icon:active{
+
+    transform:
+        perspective(1200px)
+        scale(.95)
+        rotateX(4deg);
+
+    transition:.12s;
+
+}
+
+
+/* Floating animation */
+
+.ott-icon{
+    animation:premiumFloat 5s ease-in-out infinite;
+}
+
+.ott-icon:hover{
+    animation-play-state: paused;
+
+    transform:
+        perspective(1200px)
+        rotateX(12deg)
+        rotateY(-12deg)
+        translateY(-6px)
+        scale(1.10);
+}
+
+/* MAIN */
+.content{
+  padding-top:82px;
+  padding-bottom:90px;
+}
+
+/* BANNER */
+.banner-scroll{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:0 8px;
+}
+.banner-scroll::-webkit-scrollbar{
+  display:none;
+}
+
+.banner{
+  min-width:100%;
+  height:180px;
+  padding:0 6px;
+  scroll-snap-align:start;
+}
+
+.banner img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:22px;
+  box-shadow:0 8px 25px rgba(0,0,0,.123);
+}
+
+/* TITLE */
+.title{
+  padding:16px;
+  font-size:18px;
+  font-weight:700;
+}
+
+/* GRID */
+.live-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  padding:0 12px 30px;
+}
+
+.search-bar{
+    width:92%;
+    max-width:700px;
+    height:52px;
+    margin:16px auto;
+    display:flex;
+    align-items:center;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:18px;
+    padding:0 18px;
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.25);
+    transition:.3s ease;
+}
+
+.search-bar:hover,
+.search-bar:focus-within{
+    border-color:rgba(255,255,255,.35);
+    transform:translateY(-1px);
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+.search-icon{
+    width:22px;
+    height:22px;
+    fill:#b8bcc7;
+    flex:none;
+}
+
+.search-bar input{
+    flex:1;
+    margin-left:12px;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:#fff;
+    font-size:16px;
+    font-weight:500;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+}
+
+.search-bar input::placeholder{
+    color:#9fa6b2;
+}
+
+/* 3D PREMIUM CHANNEL CARD */
+.channel{
+  position:relative;
+  background:linear-gradient(
+    145deg,
+    rgba(255,255,255,.55),
+    rgba(255,255,255,.18)
+  );
+  backdrop-filter:blur(25px);
+  border-radius:22px;
+  overflow:hidden;
+  height:95px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .35s ease;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.10),
+    inset 0 1px 1px rgba(255,255,255,.7),
+    inset 0 -1px 2px rgba(0,0,0,.08);
+  border:1px solid rgba(255,255,255,.35);
+  transform-style:preserve-3d;
+}
+
+.channel::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:60%;
+  height:100%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.45),
+    transparent
+  );
+  transform:skewX(-25deg);
+  transition:.7s;
+}
+
+.channel img{
+  width:78%;
+  height:68%;
+  object-fit:contain;
+  transition:all .35s ease;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.18));
+  transform:translateZ(20px);
+}
+
+.channel:hover{
+  transform:
+    perspective(900px)
+    rotateX(8deg)
+    rotateY(-8deg)
+    scale(1.08);
+}
+
+.channel:hover img{
+  transform:translateZ(35px) scale(1.08);
+}
+
+.channel:hover::before{
+  left:150%;
+}
+
+
+
+/* BOTTOM BAR */
+.bottom-bar{
+    position:fixed;
+    bottom:12px;
+    left:50%;
+    transform:translateX(-50%);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:72px;   /* Smaller width */
+    height:30px;      /* Smaller height */
+    padding:0 10px;   /* Less padding */
+
+    border-radius:15px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.18);
+
+    box-shadow:
+        0 4px 14px rgba(0,0,0,.15),
+        inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+#indiaTime{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+    font-size:13px;   /* Smaller text */
+    font-weight:700;
+    letter-spacing:.3px;
+}
+
+#indiaTime{
+    font-size:15px;
+    font-weight:700;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+    background:linear-gradient(90deg,
+        #007AFF,
+        #34C759,
+        #FF9500,
+        #FF2D55,
+        #AF52DE);
+    background-size:300% 100%;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    animation:iosGradient 6s linear infinite;
+    letter-spacing:.3px;
+}
+
+@keyframes iosGradient{
+    0%{background-position:0%;}
+    100%{background-position:300%;}
+}
+
+/* DARK MODE */
+body.dark{
+  background:#0b0c10;
+  color:#fff;
+}
+
+body.dark .topbar,
+body.dark .bottom-bar,
+body.dark .side-menu{
+  background:rgba(25,25,30,.8);
+}
+
+body.dark .channel,
+body.dark .ott-icon{
+  background:linear-gradient(
+    145deg,
+    rgba(255,255,255,.08),
+    rgba(255,255,255,.03)
+  );
+  border:1px solid rgba(255,255,255,.08);
+}
+
+body.dark .menu-btn,
+body.dark .theme-toggle{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+}
+.theme-toggle.glass{
+    position:absolute;
+    right:10px;
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:14px;
+    background:rgba(255,255,255,.35);
+    backdrop-filter:blur(20px);
+    color:#111;
+    font-size:20px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,0,0,.15),
+               inset 0 1px 1px rgba(255,255,255,.8);
+    transition:.3s;
+}
+.theme-toggle.glass:hover{
+    transform:scale(1.08);
+} 
+
+/* RESPONSIVE */
+@media(min-width:768px){
+  .banner{
+    height:260px;
+  }
+  .channel{
+    height:110px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">  JIOTV+ </div>
+  <button class="live-badge">
+    <span class="live-dot"></span>
+    LIVE
+</button>
+</div>
+
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<div class="side-menu" id="sideMenu">
+  <a class="ott-icon" href="https://jiohotstar-mu.vercel.app/"><img src="https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/69/e4/d7/69e4d7d9-8f83-9209-5d37-1e7c46b3b979/Placeholder.mill/400x400bb-75.webp"></a>
+  <a class="ott-icon" href="https://karthik2254.github.io/JH/"><img src="https://ak-fawn.vercel.app/images/JioTV.png"></a>
+</div>
+
+
+<script>
+const searchInput = document.querySelector(".search-bar input");
+
+searchInput.addEventListener("input", function () {
+    const filter = this.value.toLowerCase();
+    const channels = document.querySelectorAll(".channel");
+
+    channels.forEach(channel => {
+        const name = channel.querySelector("span").textContent.toLowerCase();
+
+        if (name.includes(filter)) {
+            channel.style.display = "flex";
+        } else {
+            channel.style.display = "none";
+        }
+    });
+});
+</script>
+
+  
+  <div class="search-bar">
+    <svg class="search-icon" viewBox="0 0 24 24">
+        <path d="M10 18a8 8 0 1 1 5.29-2L21 21l-1.4 1.4-5.71-5.71A8 8 0 0 1 10 18z"/>
+    </svg>
+    <input type="text" placeholder="Search channels, movies & sports...">
+</div>
+
+<div class="counter-wrapper">
+    <div class="live-count">
+        <span class="dot"></span>
+
+        <script src="https://widget.supercounters.com/ssl/online_i.js"></script>
+        <script>
+            sc_online_i(1660551, "ffffff", "ff3b30");
+        </script>
+    </div>
+</div>
+
+<style>
+.counter-wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+    margin:8px 0;
+}
+
+.live-count{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:3px 8px;
+    min-height:24px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 3px 10px rgba(0,0,0,.25);
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:11px;
+    color:#fff;
+}
+
+.dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#ff3b30;
+    box-shadow:0 0 6px #ff3b30;
+    animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        transform:scale(1.3);
+        opacity:.6;
+    }
+}
+</style>
+
+  <div class="live-grid">
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMAAHD.html"><img src="https://jiotv.catchup.cdn.jio.com/dare_images/images/Maa_HD.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMAAMOVIESHD.html"><img src="https://jiotv.catchup.cdn.jio.com/dare_images/images/Maa_Movies_HD.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMAAMUSIC.html"><img src="https://jiotv.catchup.cdn.jio.com/dare_images/images/Maa_Music.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMAAGOLD.html"><img src="https://jiotv.catchup.cdn.jio.com/dare_images/images/Maa_Gold.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMOVIESHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/a0350a2fb4d1d9879bd41ee8b3e73443.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARMOVIESSELECTHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/162e6d01542545bde0f4c213a975c7a4.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/MOVIESNOWHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/63c6e6919e9ed0aa7a6fc1a3cffd5243.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/MNXHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/95c0aa78b07210d8dbc69da5cbc525b9.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/ZEETELUGUHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/Zee_Telugu_HD.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/ZEECINEMALUHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/Zee_Cinemalu_HD.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SUNGEMINIHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/2f08455c7548e283af9dd25d287b3ce9.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SUNGEMINIMOVIESHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/b2714b7a3d6ed083b9ccb36cecad1863.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/ETVHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/23c6235eac966a5e93f152e0eb3eefc0.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/ETVCINEMALUHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/8291f351a574d7886d602ba6d86b825e.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/DISNEYCHANNELS.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/7c49ba66d0d3aa379f4f58c96e7b2610.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SUPERHUNGAMA.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/5771871bfbf60508ca13726f5a2146f6.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/CARTOONNETWORKHD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/53563f0a730b465b2bcea7fa8f67541e.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/NICK.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/715628796e2db85798ce27f8eeaa5a66.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SONYSPORTS1HD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/2d1d6a00aed9cfb469595f76744b5ebd.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SONYSPORTS2HD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/0c7e042dfe5e56480caeb6ea080b5a44.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SONYSPORTS3HD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/0f1b90b52c39acbb585620edcbb398e5.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/SONYSPORTS5HD.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/0a963bb67c1528daa7e694c522ca491d.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARSPORTS1HDTELUGU.html"><img src="https://img.media.jio.com/tvpimages/19/57/302123_1749663029798_l_medium.jpg"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/STARSPORTS2HDTELUGU.html"><img src="https://img.media.jio.com/tvpimages/84/67/302121_1749664974599_l_medium.jpg"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/DISCOVERYHDTELUGU.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/0a7f64efb395fcae23bb37e82b3f984e.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/ANIMALPLANETHDTELUGU.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/76acdd2eba9ea17b568c300d34998b1f.png"></a>
+    <a class="channel" href="https://karthik2254.github.io/JH/S/HISTORYTV18HDTELUGU.html"><img src="https://jiotvimages.cdn.jio.com/dare_images/images/channel/7134fe1e4f7cc03050569dd7a94a1544.png"></a>
+    
+    
+    
+  </div>
+</div>
+
+
+
+<div class="bottom-bar">
+  <span id="indiaTime">Loading...</span>
+</div>
+
+<script>
+function toggleMenu(){
+  document.getElementById("sideMenu").classList.toggle("open");
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  document.querySelector(".theme-toggle").textContent =
+    document.body.classList.contains("dark") ? "Dark" : "Light";
+}
+
+const banner = document.getElementById("bannerScroll");
+let pos = 0;
+
+setInterval(()=>{
+  pos += window.innerWidth;
+  if(pos >= banner.scrollWidth - window.innerWidth){
+    pos = 0;
+  }
+  banner.scrollTo({
+    left:pos,
+    behavior:"smooth"
+  });
+},3500);
+
+function updateTime(){
+  const t = new Date().toLocaleTimeString("en-IN",{
+    timeZone:"Asia/Kolkata",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  });
+  document.getElementById("indiaTime").textContent =
+    " " + t;
+}
+setInterval(updateTime,1000);
+updateTime();
+</script>
+
+</body>
+</html>
