@@ -988,13 +988,20 @@ searchInput.addEventListener("input", function () {
 <div class="counter-wrapper">
     <div class="live-count">
         <span class="dot"></span>
-
-        <script src="https://widget.supercounters.com/ssl/online_i.js"></script>
-        <script>
-            sc_online_i(1660551, "ffffff", "ff3b30");
-        </script>
+        <span id="counter"></span>
     </div>
 </div>
+
+<script src="https://widget.supercounters.com/ssl/online_i.js"></script>
+<script>
+window.onload = function () {
+    if (typeof sc_online_i === "function") {
+        sc_online_i(1660551, "ffffff", "ff3b30");
+    } else {
+        console.log("SuperCounters script failed to load.");
+    }
+};
+</script>
 
 
 
